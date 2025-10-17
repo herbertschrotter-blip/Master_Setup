@@ -1,0 +1,35 @@
+# ============================================================
+# .gitignore – PowerShell Master Setup
+# Version: 1.0.0
+# Zweck: Verhindert Upload unnötiger Dateien auf GitHub
+# ============================================================
+
+# 🔹 Logs & Backups
+04_Logs/
+05_Backup/
+
+# 🔹 Temporäre Dateien
+*.tmp
+*.bak
+*.log
+*.old
+
+# 🔹 PowerShell Cache & Module-Cache
+*.ps1xml
+*.psd1
+
+# 🔹 Windows-Systemdateien
+Thumbs.db
+Desktop.ini
+
+# 🔹 OneDrive & Office-Cache
+~$*
+*.lnk
+
+# 🔹 Editor-Dateien
+.vscode/
+*.code-workspace
+
+# 🔹 Lokale Umgebungsdateien
+.env
+*.json.backup
