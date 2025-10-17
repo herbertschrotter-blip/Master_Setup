@@ -1,6 +1,6 @@
 # ============================================================
 # Modul: List-Files.ps1
-# Version: MOD_V1.1.0
+# Version: MOD_V1.2.0
 # Zweck:   Listet alle Ordner und Dateien im Master Setup auf
 #          und speichert die Struktur als JSON im Config-Ordner.
 # Autor:   Herbert Schrotter
@@ -13,36 +13,54 @@ Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "     📂 ORDNER- UND DATEIÜBERSICHT            " -ForegroundColor Yellow
 Write-Host "=============================================" -ForegroundColor Cyan
 
-# Basisverzeichnis des Projekts (zwei Ebenen über Modules)
-$rootPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+# ------------------------------------------------------------
+# 🧠 System- und Pfadinformationen laden
+# ------------------------------------------------------------
+try {
+    # Library einbinden
+    . "$PSScriptRoot\..\Libs\Lib_Systeminfo.ps1"
 
-# Zielpfad für JSON-Datei
-$jsonPath = Join-Path -Path $rootPath -ChildPath "01_Config\Projektstruktur.json"
+    # Aktuelles System ermitteln (lädt oder erstellt JSON automatisch)
+    $sysInfo = Get-SystemInfo
 
-# Prüfen, ob Basisverzeichnis existiert
+    # RootPath aus der Systeminfo verwenden
+    $rootPath = $sysInfo.Systempfade.RootPath
+
+    Write-Host "`n🧭 Aktives System: $($sysInfo.Computername) | Benutzer: $($sysInfo.Benutzername)" -ForegroundColor Cyan
+    Write-Host "📂 RootPath: $rootPath`n" -ForegroundColor Green
+}
+catch {
+    Write-Host "`n❌ Fehler beim Laden der Systeminformationen:`n$($_.Exception.Message)" -ForegroundColor Red
+    exit
+}
+
+# ------------------------------------------------------------
+# 📁 JSON-Zielpfad für Projektstruktur
+# ------------------------------------------------------------
+$jsonPath = Join-Path -Path $sysInfo.Systempfade.ConfigPath -ChildPath "Projektstruktur.json"
+
+# ------------------------------------------------------------
+# 📂 Ordner und Dateien erfassen
+# ------------------------------------------------------------
 if (-not (Test-Path $rootPath)) {
     Write-Host "⚠️  Projektpfad wurde nicht gefunden: $rootPath" -ForegroundColor Red
     exit
 }
 
-Write-Host "`n📁 Projektverzeichnis: $rootPath`n" -ForegroundColor Green
-
-# ------------------------------------------------------------
-# 📂 Ordner und Dateien erfassen
-# ------------------------------------------------------------
-
 # Alle Unterordner
-$folders = Get-ChildItem -Path $rootPath -Directory -Recurse | Sort-Object FullName
+$folders = Get-ChildItem -Path $rootPath -Directory -Recurse -ErrorAction SilentlyContinue | Sort-Object FullName
 
 # Alle Dateien
-$files = Get-ChildItem -Path $rootPath -File -Recurse | Sort-Object FullName
+$files = Get-ChildItem -Path $rootPath -File -Recurse -ErrorAction SilentlyContinue | Sort-Object FullName
 
 # JSON-Struktur vorbereiten
 $data = [PSCustomObject]@{
-    ProjektRoot = $rootPath
-    ErstelltAm  = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    Ordner      = $folders.FullName
-    Dateien     = $files.FullName
+    System       = $sysInfo.Computername
+    Benutzer     = $sysInfo.Benutzername
+    ProjektRoot  = $rootPath
+    ErstelltAm   = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    Ordner       = $folders.FullName
+    Dateien      = $files.FullName
 }
 
 # ------------------------------------------------------------
