@@ -1,7 +1,7 @@
 # ============================================================
 # Modul: Menu-Einstellungen.ps1
-# Version: MENU_V1.0.2
-# Zweck:   Untermenü für Einstellungen (DebugMode, Systemprüfung)
+# Version: MENU_V1.0.3
+# Zweck:   Untermenü für Einstellungen (DebugMode, Systemprüfung, Projektstruktur)
 # Autor:   Herbert Schrotter
 # Datum:   17.10.2025
 # ============================================================
@@ -27,11 +27,12 @@ do {
 
     Write-Host "1 - Debug Mode umschalten"
     Write-Host "2 - Systemprüfung starten"
-    Write-Host "3 - Zurück zum Hauptmenü"
+    Write-Host "3 - Projektstruktur auflisten"     # 🆕 NEU
+    Write-Host "4 - Zurück zum Hauptmenü"
     Write-Host ""
     Write-Host "=============================================" -ForegroundColor Cyan
 
-    $sub = Read-Host "Bitte eine Zahl eingeben (1–3)"
+    $sub = Read-Host "Bitte eine Zahl eingeben (1–4)"   # 🆕 angepasst
 
     switch ($sub) {
         # ------------------------------------------------------------
@@ -61,16 +62,30 @@ do {
         }
 
         # ------------------------------------------------------------
+        # 🧾 Projektstruktur auflisten (NEU)
+        # ------------------------------------------------------------
+        "3" {
+            $listPath = "$PSScriptRoot\List-Files.ps1"
+            if (Test-Path $listPath) {
+                Write-Host "`n➡️  Starte Modul 'List-Files'..." -ForegroundColor Green
+                & $listPath
+            } else {
+                Write-Host "⚠️  Modul 'List-Files.ps1' nicht gefunden." -ForegroundColor Red
+            }
+            Start-Sleep -Seconds 1
+        }
+
+        # ------------------------------------------------------------
         # 🔙 Zurück zum Hauptmenü
         # ------------------------------------------------------------
-        "3" { break }
+        "4" { break }
 
         default {
             Write-Host "⚠️  Ungültige Eingabe – bitte erneut versuchen." -ForegroundColor Red
             Start-Sleep -Seconds 1
         }
     }
-} while ($sub -ne "3")
+} while ($sub -ne "4")   # 🆕 angepasst
 
 # ------------------------------------------------------------
 # 🔙 Ergänzt: Nach Rückkehr Master_Controller neu starten
@@ -85,4 +100,4 @@ else {
 }
 
 # 💾 Commit-Vorschlag:
-# MENU_V1.0.2 – DebugMode-Statusanzeige ergänzt & automatische Rückkehr zum Hauptmenü integriert
+# MENU_V1.0.3 – Menüpunkt „Projektstruktur auflisten“ (List-Files) hinzugefügt
