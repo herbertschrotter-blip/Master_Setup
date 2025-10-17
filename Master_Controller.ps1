@@ -1,6 +1,6 @@
 # ============================================================
 # 🧭 MASTER SETUP – SYSTEMSTART
-# Version: SYS_V1.0.0
+# Version: SYS_V1.1.0
 # ============================================================
 # Zweck:   Hauptmenü des PowerShell Master Setup Systems
 # Autor:   Herbert Schrotter
