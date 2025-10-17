@@ -4,6 +4,10 @@
 # Zweck: Verhindert Upload unnötiger Dateien auf GitHub
 # ============================================================
 
+# Konfigurationsdateien
+01_Config/Systeminfo.json
+01_Config/Projektstruktur.json
+
 # 🔹 Logs & Backups
 04_Logs/
 05_Backup/
