@@ -2,7 +2,7 @@
 # 🧭 MASTER SETUP – SYSTEMSTART
 # Version: SYS_V1.0.0
 # ============================================================
-# Zweck:   Hauptmenü des neuen Master Setup Systems
+# Zweck:   Hauptmenü des PowerShell Master Setup Systems
 # Autor:   Herbert Schrotter
 # Datum:   17.10.2025
 # ============================================================
@@ -25,12 +25,48 @@ Write-Host "=============================================" -ForegroundColor Cyan
 $wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"
 
 switch ($wahl) {
-    "1" { Write-Host "`n➡️  Modul 'Add-Baustelle' wird geladen..." -ForegroundColor Green }
-    "2" { Write-Host "`n➡️  Modul 'Update-Vorlagen' wird geladen..." -ForegroundColor Green }
-    "3" { Write-Host "`n➡️  Modul 'Backup-Monitor' wird geladen..." -ForegroundColor Green }
-    "4" { Write-Host "`n➡️  Modul 'Logs anzeigen' wird geladen..." -ForegroundColor Green }
-    "5" { Write-Host "`n➡️  Modul 'Check-System' wird geladen..." -ForegroundColor Green }
-    "6" { 
+    "1" {
+        Write-Host "`n➡️  Modul 'Add-Baustelle' wird geladen..." -ForegroundColor Green
+        # Beispielpfad: 03_Scripts\Modules\Add-Baustelle.ps1
+        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Add-Baustelle.ps1") {
+            & "$PSScriptRoot\03_Scripts\Modules\Add-Baustelle.ps1"
+        } else {
+            Write-Host "⚠️  Modul 'Add-Baustelle.ps1' nicht gefunden." -ForegroundColor Red
+        }
+    }
+    "2" {
+        Write-Host "`n➡️  Modul 'Update-Vorlagen' wird geladen..." -ForegroundColor Green
+        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Update-Vorlagen.ps1") {
+            & "$PSScriptRoot\03_Scripts\Modules\Update-Vorlagen.ps1"
+        } else {
+            Write-Host "⚠️  Modul 'Update-Vorlagen.ps1' nicht gefunden." -ForegroundColor Red
+        }
+    }
+    "3" {
+        Write-Host "`n➡️  Modul 'Backup-Monitor' wird geladen..." -ForegroundColor Green
+        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Backup-Monitor.ps1") {
+            & "$PSScriptRoot\03_Scripts\Modules\Backup-Monitor.ps1"
+        } else {
+            Write-Host "⚠️  Modul 'Backup-Monitor.ps1' nicht gefunden." -ForegroundColor Red
+        }
+    }
+    "4" {
+        Write-Host "`n➡️  Modul 'Logs anzeigen' wird geladen..." -ForegroundColor Green
+        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Show-Logs.ps1") {
+            & "$PSScriptRoot\03_Scripts\Modules\Show-Logs.ps1"
+        } else {
+            Write-Host "⚠️  Modul 'Show-Logs.ps1' nicht gefunden." -ForegroundColor Red
+        }
+    }
+    "5" {
+        Write-Host "`n➡️  Modul 'Check-System' wird geladen..." -ForegroundColor Green
+        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1") {
+            & "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1"
+        } else {
+            Write-Host "⚠️  Modul 'Check-System.ps1' nicht gefunden." -ForegroundColor Red
+        }
+    }
+    "6" {
         Write-Host "`n👋  Programm wird beendet..." -ForegroundColor Yellow
         Start-Sleep -Seconds 1
         exit
@@ -42,3 +78,6 @@ switch ($wahl) {
     }
 }
 
+Write-Host "`n=============================================" -ForegroundColor Cyan
+Write-Host "📘 Master Controller wurde korrekt ausgeführt." -ForegroundColor Green
+Write-Host "=============================================`n" -ForegroundColor Cyan
