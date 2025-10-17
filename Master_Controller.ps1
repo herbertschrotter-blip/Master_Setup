@@ -8,16 +8,17 @@
 # ============================================================
 
 # ------------------------------------------------------------
-# 🔍 Systemprüfung beim Start ausführen
+# 💻 Benutzer- und Systemerkennung beim Start ausführen
 # ------------------------------------------------------------
-$checkSystemPath = "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1"
-if (Test-Path $checkSystemPath) {
+$detectSystemPath = "$PSScriptRoot\03_Scripts\Modules\Detect-System.ps1"
+
+if (Test-Path $detectSystemPath) {
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "        🔍 SYSTEMPRÜFUNG BEIM START           " -ForegroundColor Yellow
+    Write-Host "     💻 BENUTZER- UND SYSTEMERKENNUNG         " -ForegroundColor Yellow
     Write-Host "=============================================" -ForegroundColor Cyan
-    & $checkSystemPath
+    & $detectSystemPath
 } else {
-    Write-Host "⚠️  Modul 'Check-System.ps1' nicht gefunden – Systemprüfung übersprungen!" -ForegroundColor Red
+    Write-Host "⚠️  Modul 'Detect-System.ps1' nicht gefunden – Erkennung übersprungen!" -ForegroundColor Red
 }
 
 # ------------------------------------------------------------
