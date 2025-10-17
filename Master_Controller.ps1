@@ -1,6 +1,6 @@
 # ============================================================
 # 🧭 MASTER SETUP – SYSTEMSTART
-# Version: SYS_V1.1.1
+# Version: SYS_V1.1.2
 # ============================================================
 # Zweck:   Hauptmenü des PowerShell Master Setup Systems
 # Autor:   Herbert Schrotter
@@ -32,7 +32,7 @@ Write-Host "1 - Neue Baustelle anlegen"
 Write-Host "2 - Vorlagen aktualisieren"
 Write-Host "3 - Backup prüfen"
 Write-Host "4 - Logdateien anzeigen"
-Write-Host "5 - Systemprüfung"
+Write-Host "5 - Einstellungen"                     # geändert
 Write-Host "6 - Beenden"
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
@@ -40,7 +40,7 @@ Write-Host "=============================================" -ForegroundColor Cyan
 # ------------------------------------------------------------
 # 📥 Benutzerabfrage & Modulstart
 # ------------------------------------------------------------
-$wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"
+$wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"  # bleibt gleich
 
 function Start-Module($name) {
     $path = "$PSScriptRoot\03_Scripts\Modules\$name.ps1"
@@ -57,7 +57,7 @@ switch ($wahl) {
     "2" { Start-Module "Update-Vorlagen" }
     "3" { Start-Module "Backup-Monitor" }
     "4" { Start-Module "Show-Logs" }
-    "5" { Start-Module "Check-System" }
+    "5" { & "$PSScriptRoot\03_Scripts\Modules\Menu-Einstellungen.ps1" }   # geändert
     "6" {
         Write-Host "`n👋  Programm wird beendet..." -ForegroundColor Yellow
         Start-Sleep -Seconds 1
@@ -73,3 +73,4 @@ switch ($wahl) {
 Write-Host "`n=============================================" -ForegroundColor Cyan
 Write-Host "📘 Master Controller wurde korrekt ausgeführt." -ForegroundColor Green
 Write-Host "=============================================`n" -ForegroundColor Cyan
+
