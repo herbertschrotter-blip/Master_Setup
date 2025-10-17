@@ -13,6 +13,13 @@
 try {
     . "$PSScriptRoot\03_Scripts\Libs\Lib_Systeminfo.ps1"
     $sysInfo = Get-SystemInfo -Silent
+
+    # 🔧 DebugMode beim Start deaktivieren, falls aktiv
+    if ($sysInfo.DebugMode) {
+        Write-Host "🧹 DebugMode war aktiv – wird automatisch deaktiviert." -ForegroundColor DarkGray
+        Set-DebugMode -Value $false
+    }
+
     Write-Host "🧭 System erkannt: $($sysInfo.Benutzername)@$($sysInfo.Computername)" -ForegroundColor Cyan
 }
 catch {
