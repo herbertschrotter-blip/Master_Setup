@@ -7,18 +7,16 @@
 # Datum:   17.10.2025
 # ============================================================
 
-# ------------------------------------------------------------
-# 💻 Benutzer- und Systemerkennung beim Start ausführen
-# ------------------------------------------------------------
-$detectSystemPath = "$PSScriptRoot\03_Scripts\Modules\Detect-System.ps1"
-
-if (Test-Path $detectSystemPath) {
-    Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "     💻 BENUTZER- UND SYSTEMERKENNUNG         " -ForegroundColor Yellow
-    Write-Host "=============================================" -ForegroundColor Cyan
-    & $detectSystemPath
-} else {
-    Write-Host "⚠️  Modul 'Detect-System.ps1' nicht gefunden – Erkennung übersprungen!" -ForegroundColor Red
+# ============================================================
+# 🧠 System- und Benutzererkennung beim Start
+# ============================================================
+try {
+    . "$PSScriptRoot\03_Scripts\Libs\Lib_Systeminfo.ps1"
+    $sysInfo = Get-SystemInfo
+    Write-Host "🧭 Aktives System: $($sysInfo.Computername) | Benutzer: $($sysInfo.Benutzername)" -ForegroundColor Cyan
+}
+catch {
+    Write-Host "❌ Fehler beim Laden der Systeminformationen: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 # ------------------------------------------------------------

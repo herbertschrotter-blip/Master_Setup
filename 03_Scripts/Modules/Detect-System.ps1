@@ -1,8 +1,8 @@
 # ============================================================
 # Modul: Detect-System.ps1
-# Version: MOD_V1.0.0
+# Version: MOD_V1.1.0
 # Zweck:   Erkennt Benutzer- und Systeminformationen
-#          und legt dynamische Projektpfade je System an.
+#          und speichert bzw. aktualisiert Systeminfo.json (Multi-System-Support)
 # Autor:   Herbert Schrotter
 # Datum:   17.10.2025
 # ============================================================
@@ -22,14 +22,10 @@ $userProfile  = $env:USERPROFILE
 $osVersion    = (Get-CimInstance Win32_OperatingSystem).Caption
 $rootPath     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
-Write-Host "`n👤 Benutzer:  $userName"
-Write-Host "🖥️  Computer: $computerName"
-Write-Host "💽 System:    $osVersion`n"
-
 # ------------------------------------------------------------
-# 📁 Projektpfade dynamisch aufbauen
+# 📁 Systempfade dynamisch aufbauen
 # ------------------------------------------------------------
-$projectPaths = [ordered]@{
+$systemPaths = [ordered]@{
     RootPath        = $rootPath
     ConfigPath      = Join-Path $rootPath "01_Config"
     TemplatePath    = Join-Path $rootPath "02_Templates"
@@ -41,38 +37,58 @@ $projectPaths = [ordered]@{
 }
 
 # ------------------------------------------------------------
-# 🧩 Struktur für JSON
+# 💾 JSON-Datei lesen oder neu erstellen
 # ------------------------------------------------------------
-$systemData = [PSCustomObject]@{
-    Benutzername   = $userName
-    Computername   = $computerName
-    System         = $osVersion
-    ProfilPfad     = $userProfile
-    ErkanntAm      = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    Projektpfade   = $projectPaths
+$configPath = Join-Path $rootPath "01_Config\Systeminfo.json"
+$sysData = @{}
+
+if (Test-Path $configPath) {
+    try {
+        $sysData = Get-Content $configPath -Raw | ConvertFrom-Json
+    } catch {
+        Write-Host "⚠️  Fehler beim Lesen der Systeminfo.json – wird neu erstellt." -ForegroundColor Yellow
+        $sysData = @{}
+    }
+}
+
+if (-not $sysData.Systeme) {
+    $sysData = [PSCustomObject]@{ Systeme = @() }
+}
+
+# ------------------------------------------------------------
+# 🔁 Prüfen, ob aktuelles System schon existiert
+# ------------------------------------------------------------
+$existing = $sysData.Systeme | Where-Object {
+    $_.Benutzername -eq $userName -and $_.Computername -eq $computerName
+}
+
+if ($existing) {
+    Write-Host "🔄 System bereits vorhanden – aktualisiere Eintrag..." -ForegroundColor Yellow
+    $existing.Systempfade = $systemPaths
+    $existing.ErkanntAm = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+} else {
+    Write-Host "➕ Neues System erkannt – füge Eintrag hinzu..." -ForegroundColor Green
+    $newEntry = [PSCustomObject]@{
+        Benutzername   = $userName
+        Computername   = $computerName
+        System         = $osVersion
+        ProfilPfad     = $userProfile
+        ErkanntAm      = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+        Systempfade    = $systemPaths
+    }
+    $sysData.Systeme += $newEntry
 }
 
 # ------------------------------------------------------------
 # 💾 In JSON-Datei speichern
 # ------------------------------------------------------------
-$configPath = Join-Path $rootPath "01_Config\Systeminfo.json"
-
 try {
-    $systemData | ConvertTo-Json -Depth 5 | Out-File -FilePath $configPath -Encoding UTF8
-    Write-Host "`n✅ System- und Benutzerinfos gespeichert unter:`n   $configPath" -ForegroundColor Green
+    $sysData | ConvertTo-Json -Depth 6 | Out-File -FilePath $configPath -Encoding UTF8
+    Write-Host "`n✅ Systeminformationen aktualisiert unter:`n   $configPath" -ForegroundColor Green
 }
 catch {
-    Write-Host "`n⚠️  Fehler beim Schreiben der JSON-Datei:" -ForegroundColor Red
-    Write-Host $_.Exception.Message -ForegroundColor DarkRed
-}
-
-# ------------------------------------------------------------
-# 🧾 Kurze Vorschau
-# ------------------------------------------------------------
-Write-Host "`n📋 Zusammenfassung:" -ForegroundColor Cyan
-$projectPaths.GetEnumerator() | ForEach-Object {
-    Write-Host ("   📂 " + $_.Key.PadRight(15) + " → " + $_.Value) -ForegroundColor White
+    Write-Host "`n❌ Fehler beim Schreiben der Systeminfo.json:`n$_" -ForegroundColor Red
 }
 
 Write-Host "`n✅ Systemerkennung abgeschlossen.`n" -ForegroundColor Green
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
