@@ -19,18 +19,6 @@ zu automatisieren und in einer einzigen Oberfläche zu vereinen.
 
 ---
 
-## 📁 Verzeichnisstruktur
-```plaintext
-00_MASTER_SETUP/
-├── 00_Info/
-├── 01_Config/
-├── 02_Templates/
-├── 03_Scripts/
-│   ├── Libs/
-│   └── Modules/
-├── 04_Logs/
-└── 05_Backup/
-
 ## ⚙️ Aktueller Entwicklungsstand
 
 ✅ Hauptmenü erstellt (Master_Controller.ps1)
@@ -52,3 +40,18 @@ Starte das Tool über:
 
 Dieses Projekt ist für den privaten Gebrauch von Herbert Schrotter bestimmt.
 Eine Weitergabe oder Veröffentlichung ist ohne Zustimmung nicht erlaubt.
+
+---
+
+## 📁 Verzeichnisstruktur
+```plaintext
+00_MASTER_SETUP/
+├── 00_Info/
+├── 01_Config/
+├── 02_Templates/
+├── 03_Scripts/
+│   ├── Libs/
+│   └── Modules/
+├── 04_Logs/
+└── 05_Backup/
+
