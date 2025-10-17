@@ -30,3 +30,21 @@ zu automatisieren und in einer einzigen Oberfläche zu vereinen.
 │   └── Modules/
 ├── 04_Logs/
 └── 05_Backup/
+
+⚙️ Aktueller Entwicklungsstand
+
+✅ Hauptmenü erstellt (Master_Controller.ps1)
+
+🔜 Module werden schrittweise integriert
+(z. B. Check-System.ps1, Add-Baustelle.ps1, etc.)
+
+💾 Nutzung
+
+Starte das Tool über:
+
+.\Master_Controller.ps1
+
+🧩 Lizenz
+
+Dieses Projekt ist für den privaten Gebrauch von Herbert Schrotter bestimmt.
+Eine Weitergabe oder Veröffentlichung ist ohne Zustimmung nicht erlaubt.
