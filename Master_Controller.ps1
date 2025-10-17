@@ -1,22 +1,23 @@
 # ============================================================
 # 🧭 MASTER SETUP – SYSTEMSTART
-# Version: SYS_V1.1.0
+# Version: SYS_V1.1.1
 # ============================================================
 # Zweck:   Hauptmenü des PowerShell Master Setup Systems
 # Autor:   Herbert Schrotter
 # Datum:   17.10.2025
 # ============================================================
 
-# ============================================================
-# 🧠 System- und Benutzererkennung beim Start
-# ============================================================
+# ------------------------------------------------------------
+# 🧠 Systeminfo Light-Check
+# ------------------------------------------------------------
 try {
     . "$PSScriptRoot\03_Scripts\Libs\Lib_Systeminfo.ps1"
-    $sysInfo = Get-SystemInfo
-    Write-Host "🧭 Aktives System: $($sysInfo.Computername) | Benutzer: $($sysInfo.Benutzername)" -ForegroundColor Cyan
+    $sysInfo = Get-SystemInfo -Silent
+    Write-Host "🧭 System erkannt: $($sysInfo.Benutzername)@$($sysInfo.Computername)" -ForegroundColor Cyan
 }
 catch {
-    Write-Host "❌ Fehler beim Laden der Systeminformationen: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "⚠️  Keine gültige Systeminfo. Starte Registrierung..."
+    & "$PSScriptRoot\03_Scripts\Modules\Detect-System.ps1"
 }
 
 # ------------------------------------------------------------
@@ -36,51 +37,27 @@ Write-Host "6 - Beenden"
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
 
-# Benutzerabfrage
+# ------------------------------------------------------------
+# 📥 Benutzerabfrage & Modulstart
+# ------------------------------------------------------------
 $wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"
 
+function Start-Module($name) {
+    $path = "$PSScriptRoot\03_Scripts\Modules\$name.ps1"
+    if (Test-Path $path) {
+        Write-Host "`n➡️  Modul '$name' wird geladen..." -ForegroundColor Green
+        & $path
+    } else {
+        Write-Host "⚠️  Modul '$name.ps1' nicht gefunden." -ForegroundColor Red
+    }
+}
+
 switch ($wahl) {
-    "1" {
-        Write-Host "`n➡️  Modul 'Add-Baustelle' wird geladen..." -ForegroundColor Green
-        # Beispielpfad: 03_Scripts\Modules\Add-Baustelle.ps1
-        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Add-Baustelle.ps1") {
-            & "$PSScriptRoot\03_Scripts\Modules\Add-Baustelle.ps1"
-        } else {
-            Write-Host "⚠️  Modul 'Add-Baustelle.ps1' nicht gefunden." -ForegroundColor Red
-        }
-    }
-    "2" {
-        Write-Host "`n➡️  Modul 'Update-Vorlagen' wird geladen..." -ForegroundColor Green
-        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Update-Vorlagen.ps1") {
-            & "$PSScriptRoot\03_Scripts\Modules\Update-Vorlagen.ps1"
-        } else {
-            Write-Host "⚠️  Modul 'Update-Vorlagen.ps1' nicht gefunden." -ForegroundColor Red
-        }
-    }
-    "3" {
-        Write-Host "`n➡️  Modul 'Backup-Monitor' wird geladen..." -ForegroundColor Green
-        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Backup-Monitor.ps1") {
-            & "$PSScriptRoot\03_Scripts\Modules\Backup-Monitor.ps1"
-        } else {
-            Write-Host "⚠️  Modul 'Backup-Monitor.ps1' nicht gefunden." -ForegroundColor Red
-        }
-    }
-    "4" {
-        Write-Host "`n➡️  Modul 'Logs anzeigen' wird geladen..." -ForegroundColor Green
-        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Show-Logs.ps1") {
-            & "$PSScriptRoot\03_Scripts\Modules\Show-Logs.ps1"
-        } else {
-            Write-Host "⚠️  Modul 'Show-Logs.ps1' nicht gefunden." -ForegroundColor Red
-        }
-    }
-    "5" {
-        Write-Host "`n➡️  Modul 'Check-System' wird geladen..." -ForegroundColor Green
-        if (Test-Path "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1") {
-            & "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1"
-        } else {
-            Write-Host "⚠️  Modul 'Check-System.ps1' nicht gefunden." -ForegroundColor Red
-        }
-    }
+    "1" { Start-Module "Add-Baustelle" }
+    "2" { Start-Module "Update-Vorlagen" }
+    "3" { Start-Module "Backup-Monitor" }
+    "4" { Start-Module "Show-Logs" }
+    "5" { Start-Module "Check-System" }
     "6" {
         Write-Host "`n👋  Programm wird beendet..." -ForegroundColor Yellow
         Start-Sleep -Seconds 1
@@ -89,7 +66,7 @@ switch ($wahl) {
     default {
         Write-Host "`n⚠️  Ungültige Eingabe! Bitte erneut versuchen." -ForegroundColor Red
         Start-Sleep -Seconds 1
-        & "$PSCommandPath"   # Neustart des Skripts
+        & "$PSCommandPath"
     }
 }
 
