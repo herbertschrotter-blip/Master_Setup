@@ -7,6 +7,22 @@
 # Datum:   17.10.2025
 # ============================================================
 
+# ------------------------------------------------------------
+# 🔍 Systemprüfung beim Start ausführen
+# ------------------------------------------------------------
+$checkSystemPath = "$PSScriptRoot\03_Scripts\Modules\Check-System.ps1"
+if (Test-Path $checkSystemPath) {
+    Write-Host "=============================================" -ForegroundColor Cyan
+    Write-Host "        🔍 SYSTEMPRÜFUNG BEIM START           " -ForegroundColor Yellow
+    Write-Host "=============================================" -ForegroundColor Cyan
+    & $checkSystemPath
+} else {
+    Write-Host "⚠️  Modul 'Check-System.ps1' nicht gefunden – Systemprüfung übersprungen!" -ForegroundColor Red
+}
+
+# ------------------------------------------------------------
+# 🧭 Hauptmenü anzeigen
+# ------------------------------------------------------------
 Clear-Host
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "        🧭 MASTER SETUP - HAUPTMENÜ          " -ForegroundColor Yellow
