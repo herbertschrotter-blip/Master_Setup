@@ -36,7 +36,7 @@ function Write-DebugLog {
 
 # ------------------------------------------------------------
 # 🪲 Write-DebugFile
-# Zweck: Schreibt Debug-Informationen in eine Logdatei
+# Zweck: Schreibt Debug-Informationen in eine Logdatei (eine pro Sitzung)
 # ------------------------------------------------------------
 function Write-DebugFile {
     param(
@@ -54,12 +54,20 @@ function Write-DebugFile {
             New-Item -ItemType Directory -Path $logDir | Out-Null
         }
 
-        $logFile = Join-Path $logDir ("Debug_" + (Get-Date -Format "yyyy-MM-dd") + ".log")
+        # 🧩 Datei einmal pro Sitzung erstellen
+        if (-not $script:DebugLogFile) {
+            $timestamp = (Get-Date -Format "yyyy-MM-dd_HH-mm-ss")
+            $script:DebugLogFile = Join-Path $logDir ("Debug_" + $timestamp + ".log")
+
+            # Eintrag nur einmal am Anfang
+            Add-Content -Path $script:DebugLogFile -Value "=== DEBUG-SITZUNG START | $timestamp ==="
+        }
+
         $time = (Get-Date).ToString("HH:mm:ss")
         $prefixText = if ($Prefix) { "[$Prefix] " } else { "" }
 
         $entry = "[$time] 🪲 ${prefixText}$Message"
-        Add-Content -Path $logFile -Value $entry
+        Add-Content -Path $script:DebugLogFile -Value $entry
     }
     catch {
         Write-Host "⚠️  Fehler in Write-DebugFile: $($_.Exception.Message)" -ForegroundColor Red
