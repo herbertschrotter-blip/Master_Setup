@@ -1,7 +1,7 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.0.2
-# Zweck:   Neue Baustelle anlegen (Name + Projektliste.json über Lib_Json)
+# Version: MOD_V1.0.4
+# Zweck:   Neue Baustelle anlegen (Projekte gruppiert nach Benutzer/Computer)
 # Autor:   Herbert Schrotter
 # Datum:   18.10.2025
 # ============================================================
@@ -51,43 +51,81 @@ if ([string]::IsNullOrWhiteSpace($projektName)) {
 $projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
 
 # ------------------------------------------------------------
-# 🧱 Prüfen, ob Projekt bereits existiert
+# 🧱 Bestehende Liste laden oder Grundstruktur anlegen
 # ------------------------------------------------------------
-$projektListe = Get-JsonFile -Path $projektListePath -CreateIfMissing
+$data = Get-JsonFile -Path $projektListePath -CreateIfMissing
+
+if (-not $data -or $data.Count -eq 0) {
+    $data = @(
+        @{
+            Benutzer = @{
+                ($sysInfo.Benutzername) = @{
+                    ($sysInfo.Computername) = @{
+                        Projekte = @()
+                    }
+                }
+            }
+        }
+    )
+}
+
+# Benutzer- und Computer-Node referenzieren oder anlegen
+$userNode = $data[0].Benutzer.$($sysInfo.Benutzername)
+if (-not $userNode) {
+    $data[0].Benutzer.$($sysInfo.Benutzername) = @{}
+    $userNode = $data[0].Benutzer.$($sysInfo.Benutzername)
+}
+
+$pcNode = $userNode.$($sysInfo.Computername)
+if (-not $pcNode) {
+    $userNode.$($sysInfo.Computername) = @{ Projekte = @() }
+    $pcNode = $userNode.$($sysInfo.Computername)
+}
+
+# ------------------------------------------------------------
+# 🔍 Prüfen, ob Projekt bereits existiert
+# ------------------------------------------------------------
 $exists = $false
-foreach ($p in $projektListe) {
-    if ($p.Projektname -eq $projektName) {
+foreach ($p in $pcNode.Projekte) {
+    if ($p.Name -eq $projektName) {
         $exists = $true
         break
     }
 }
 
 if ($exists) {
-    Write-Host "⚠️  Projekt '$projektName' existiert bereits in der Projektliste.json" -ForegroundColor Yellow
+    Write-Host "⚠️  Projekt '$projektName' existiert bereits auf diesem System." -ForegroundColor Yellow
     return
 }
 
 # ------------------------------------------------------------
-# 🧩 Neuen Eintrag vorbereiten
+# 🧩 Neuen Projekteintag hinzufügen (Fix für fehlende Property)
 # ------------------------------------------------------------
-$newEntry = [PSCustomObject]@{
-    Datum        = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-    Projektname  = $projektName
-    Benutzer     = $sysInfo.Benutzername
-    Computer     = $sysInfo.Computername
-    RootPfad     = $sysInfo.Systempfade.RootPath
+$newProject = [PSCustomObject]@{
+    Name   = $projektName
+    Status = "Neu"
+    Datum  = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    Pfad   = $sysInfo.Systempfade.RootPath
 }
 
+# Prüfen, ob 'Projekte' vorhanden ist – wenn nicht, hinzufügen
+if (-not ($pcNode.PSObject.Properties.Name -contains "Projekte")) {
+    Add-Member -InputObject $pcNode -MemberType NoteProperty -Name "Projekte" -Value @()
+}
+
+# Jetzt sicher anhängen
+$pcNode.Projekte += $newProject
+
 # ------------------------------------------------------------
-# 💾 Eintrag in Projektliste.json hinzufügen
+# 💾 Speichern
 # ------------------------------------------------------------
 try {
-    Add-JsonEntry -Path $projektListePath -Entry $newEntry
-    Write-Host "`n✅ Neuer Projekteintrag wurde erfolgreich in 'Projektliste.json' gespeichert."
-    Write-Host "📄 Pfad: $projektListePath"
+    Save-JsonFile -Data $data -Path $projektListePath
+    Write-Host "`n✅ Projekt '$projektName' wurde erfolgreich hinzugefügt."
+    Write-Host "📄 Gespeichert in: $projektListePath"
 }
 catch {
-    Write-Host "❌ Fehler beim Hinzufügen zur Projektliste: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "❌ Fehler beim Speichern: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 # ------------------------------------------------------------
