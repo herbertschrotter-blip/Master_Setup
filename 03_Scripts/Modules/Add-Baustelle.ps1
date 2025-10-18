@@ -1,7 +1,7 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.0.6a
-# Zweck:   Verwaltung der Projektliste (Neue Baustelle, Liste anzeigen, Status ändern – mit Menüauswahl)
+# Version: MOD_V1.0.7
+# Zweck:   Verwaltung der Projektliste (inkl. Status-Zusammenfassung im Menü)
 # Autor:   Herbert Schrotter
 # Datum:   18.10.2025
 # ============================================================
@@ -37,12 +37,45 @@ if (Get-DebugMode) {
 }
 
 # ------------------------------------------------------------
+# 📊 Status-Zusammenfassung anzeigen
+# ------------------------------------------------------------
+$projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
+$aktiveCount = 0
+$abgeschlCount = 0
+
+if (Test-Path $projektListePath) {
+    try {
+        $data = Get-JsonFile -Path $projektListePath
+        foreach ($benutzer in $data[0].Benutzer.PSObject.Properties.Name) {
+            foreach ($computer in $data[0].Benutzer.$benutzer.PSObject.Properties.Name) {
+                $projekte = $data[0].Benutzer.$benutzer.$computer.Projekte
+                foreach ($p in $projekte) {
+                    if ($p.Status -eq "Aktiv") { $aktiveCount++ }
+                    elseif ($p.Status -eq "Abgeschlossen") { $abgeschlCount++ }
+                }
+            }
+        }
+    }
+    catch {
+        Write-Host "⚠️  Konnte Projektliste nicht auslesen." -ForegroundColor Yellow
+    }
+}
+
+# ------------------------------------------------------------
 # 📋 Menüauswahl
 # ------------------------------------------------------------
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Gray
 Write-Host "🏗️  ADD-BAUSTELLE – PROJEKTVERWALTUNG" -ForegroundColor Cyan
 Write-Host "============================================="
+
+if (Test-Path $projektListePath) {
+    Write-Host ("📊 Aktive Projekte: {0} | Abgeschlossene: {1}" -f $aktiveCount, $abgeschlCount) -ForegroundColor DarkCyan
+}
+else {
+    Write-Host "📊 Noch keine Projektliste vorhanden." -ForegroundColor DarkGray
+}
+
 Write-Host ""
 Write-Host "1️⃣  Neue Baustelle anlegen"
 Write-Host "2️⃣  Projektliste anzeigen"
@@ -65,7 +98,6 @@ switch ($wahl) {
             return
         }
 
-        $projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
         $data = Get-JsonFile -Path $projektListePath -CreateIfMissing
 
         # Wenn Datei leer → erste Anlage inklusive Projekt
@@ -142,7 +174,6 @@ switch ($wahl) {
     # ------------------------------------------------------------
     "2" {
         Write-Host "`n📋  Projektliste anzeigen`n"
-        $projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
         if (-not (Test-Path $projektListePath)) {
             Write-Host "⚠️  Keine Projektliste gefunden. Bitte zuerst eine Baustelle anlegen." -ForegroundColor Yellow
             return
@@ -177,7 +208,6 @@ switch ($wahl) {
     "3" {
         Write-Host "`n🛠️  Projektstatus ändern`n"
 
-        $projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
         if (-not (Test-Path $projektListePath)) {
             Write-Host "⚠️  Keine Projektliste gefunden. Bitte zuerst eine Baustelle anlegen." -ForegroundColor Yellow
             return
