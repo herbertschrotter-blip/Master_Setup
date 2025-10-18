@@ -1,7 +1,7 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.0.1
-# Zweck:   Neue Baustelle anlegen (nur Name + Projektliste.json)
+# Version: MOD_V1.0.2
+# Zweck:   Neue Baustelle anlegen (Name + Projektliste.json über Lib_Json)
 # Autor:   Herbert Schrotter
 # Datum:   18.10.2025
 # ============================================================
@@ -15,6 +15,17 @@ try {
 }
 catch {
     Write-Host "❌ Fehler beim Laden der Systeminformationen: $($_.Exception.Message)" -ForegroundColor Red
+    return
+}
+
+# ------------------------------------------------------------
+# 🧩 JSON-Library laden
+# ------------------------------------------------------------
+try {
+    . "$PSScriptRoot\..\Libs\Lib_Json.ps1"
+}
+catch {
+    Write-Host "❌ Fehler beim Laden der Lib_Json.ps1: $($_.Exception.Message)" -ForegroundColor Red
     return
 }
 
@@ -35,12 +46,29 @@ if ([string]::IsNullOrWhiteSpace($projektName)) {
 }
 
 # ------------------------------------------------------------
-# 🧩 Pfad zur Projektliste festlegen
+# 📄 Pfad zur Projektliste definieren
 # ------------------------------------------------------------
 $projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
 
 # ------------------------------------------------------------
-# 📦 Neuer Eintrag vorbereiten
+# 🧱 Prüfen, ob Projekt bereits existiert
+# ------------------------------------------------------------
+$projektListe = Get-JsonFile -Path $projektListePath -CreateIfMissing
+$exists = $false
+foreach ($p in $projektListe) {
+    if ($p.Projektname -eq $projektName) {
+        $exists = $true
+        break
+    }
+}
+
+if ($exists) {
+    Write-Host "⚠️  Projekt '$projektName' existiert bereits in der Projektliste.json" -ForegroundColor Yellow
+    return
+}
+
+# ------------------------------------------------------------
+# 🧩 Neuen Eintrag vorbereiten
 # ------------------------------------------------------------
 $newEntry = [PSCustomObject]@{
     Datum        = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
@@ -51,30 +79,15 @@ $newEntry = [PSCustomObject]@{
 }
 
 # ------------------------------------------------------------
-# 💾 Eintrag in Projektliste.json schreiben oder ergänzen
+# 💾 Eintrag in Projektliste.json hinzufügen
 # ------------------------------------------------------------
 try {
-    if (Test-Path $projektListePath) {
-        # Bestehende Datei laden und erweitern
-        $projektData = Get-Content $projektListePath -Raw | ConvertFrom-Json
-        if (-not $projektData -or -not ($projektData -is [System.Collections.IEnumerable])) {
-            $projektData = @()
-        }
-        $projektData += $newEntry
-    }
-    else {
-        # Neue Datei erstellen
-        $projektData = @($newEntry)
-    }
-
-    # Speichern als JSON (UTF8 ohne BOM)
-    $projektData | ConvertTo-Json -Depth 4 | Set-Content -Path $projektListePath -Encoding utf8
-
+    Add-JsonEntry -Path $projektListePath -Entry $newEntry
     Write-Host "`n✅ Neuer Projekteintrag wurde erfolgreich in 'Projektliste.json' gespeichert."
     Write-Host "📄 Pfad: $projektListePath"
 }
 catch {
-    Write-Host "❌ Fehler beim Schreiben der Projektliste.json: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "❌ Fehler beim Hinzufügen zur Projektliste: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 # ------------------------------------------------------------
