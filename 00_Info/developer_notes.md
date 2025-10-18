@@ -11,6 +11,8 @@ Sie basiert auf dem aktuellen System-Framework (Stand: 18.10.2025).
 
 ## 🗂️ Projektstruktur
 
+Die Struktur deiner JSON-Ausgabe zeigt alle relevanten Dateien und Ordner deines Projekts korrekt an. Das Schema deckt sich mit dieser Struktur, also passt sie – sie spiegelt das aktuelle Setup realistisch wider.
+
 ```plaintext
 00_MASTER_SETUP/
 ├── .vscode/                     ← Editor-Einstellungen (launch.json etc.)
@@ -25,7 +27,8 @@ Sie basiert auf dem aktuellen System-Framework (Stand: 18.10.2025).
 │   ├── Libs/                    ← zentrale Bibliotheken
 │   │   ├── Lib_Systeminfo.ps1
 │   │   ├── Lib_ListFiles.ps1
-│   │   └── Lib_Debug.ps1
+│   │   ├── Lib_Debug.ps1
+│   │   └── Lib_Json.ps1
 │   └── Modules/                 ← eigenständige Module
 │       ├── Add-Baustelle.ps1
 │       ├── Backup-Monitor.ps1
@@ -138,32 +141,6 @@ Aktiviert erweiterte Konsolenausgaben und Debug-Logs in allen Modulen.
 * wird **nur beim Menüpunkt „Beenden“** automatisch auf `false` gesetzt
 * zeigt in allen Menüs den Hinweis `🪲 DEBUG-MODE AKTIVIERT`
 
-**Beispiel:**
-
-```powershell
-if (Get-DebugMode) {
-    Write-Host "🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow
-}
-```
-
-**Beispielhafte Systeminfo.json mit DebugMode:**
-
-```json
-{
-  "DebugMode": true,
-  "Systeme": [
-    {
-      "Benutzername": "herbe",
-      "Computername": "DESKTOP-PC",
-      "System": "Microsoft Windows 11 Pro",
-      "Systempfade": {
-        "RootPath": "D:\\OneDrive\\Dokumente\\02 Arbeit\\05 Vorlagen - Scripte\\00_Master_Setup"
-      }
-    }
-  ]
-}
-```
-
 ---
 
 ### 6️⃣ Untermenüs (seit SYS_V1.1.4)
@@ -200,6 +177,14 @@ LIB_V1.2.4 – Set-DebugMode korrigiert: legt DebugMode automatisch an, falls in
 ---
 
 ## 🧩 Library-Übersicht
+
+### 🔹 Lib_Json.ps1
+
+* Universelle JSON-Verwaltungsbibliothek
+* Dient zum Einlesen, Speichern und Aktualisieren beliebiger JSON-Dateien im gesamten Framework
+* Enthält Funktionen `Get-JsonFile`, `Save-JsonFile`, `Add-JsonEntry`
+* Unterstützt automatisches Anlegen von Dateien und sichere Fehlerbehandlung
+* Wird aktuell primär in `Add-Baustelle.ps1` eingesetzt, künftig globale Verwendung in allen Modulen geplant
 
 ### 🔹 Lib_Systeminfo.ps1
 
@@ -239,82 +224,51 @@ Hauptfunktion:
 
 ## 🧩 Modul-Übersicht
 
-### 🔹 Master_Controller.ps1
+### 🔹 Add-Baustelle.ps1
 
-Hauptmenü des Systems.
+* Modul zur Verwaltung von Projekten (Baustellen)
+* Verwendet systemunabhängige JSON-Struktur mit `Lib_Json.ps1`
+* Integriert **Statussystem** (Aktiv / Abgeschlossen) und Menüführung mit Rückkehrmöglichkeit
+* Ausgabe in konsolengerechter **ASCII-Tabelle** (Name, Status, Datum)
+* Künftige Erweiterungen: Projekt löschen, archivieren, filtern, Sync mit OneDrive
+
+### 🔹 Master_Controller.ps1
 
 * Startpunkt für alle Module
 * Zeigt Debug-Hinweis bei Aktivierung
 * Deaktiviert DebugMode nur beim „Beenden“
 
----
-
 ### 🔹 Menu-Einstellungen.ps1
-
-Untermenü für:
 
 * DebugMode umschalten
 * Systemprüfung
 * Projektstruktur auflisten
 * Rückkehr zum Hauptmenü
 
----
-
 ### 🔹 Check-System.ps1
-
-Prüft Systemstatus und Setup-Integrität:
 
 * Kontrolle der Hauptordnerstruktur
 * Prüft `Systeminfo.json` und `Projektstruktur.json`
 * Gibt Statusberichte im Konsolenstil aus
-* Zeigt ExecutionPolicy und deren Bedeutung an:
-
-  | Wert             | Bedeutung                                                                  |
-  | ---------------- | -------------------------------------------------------------------------- |
-  | **Restricted**   | Keine Skripte dürfen laufen                                                |
-  | **AllSigned**    | Nur signierte Skripte dürfen laufen                                        |
-  | **RemoteSigned** | Lokale Skripte erlaubt, Internet-Skripte müssen signiert sein              |
-  | **Unrestricted** | Alles darf laufen (nur Warnungen bei Internet-Skripten)                    |
-  | **Bypass**       | Keine Prüfungen, alles erlaubt (wird oft für interne Frameworks verwendet) |
-
----
 
 ### 🔹 Detect-System.ps1
 
-Wird automatisch gestartet, wenn `Systeminfo.json` fehlt.
-
-* erkennt Benutzername, Computername, Systempfade
-* erzeugt neue `Systeminfo.json`
-* schreibt bei aktivem DebugMode detaillierte Logs über jeden Schritt
-
----
+* Erstellt automatisch `Systeminfo.json`
+* Erkennt Benutzername, Computername, Systempfade
+* Schreibt bei aktivem DebugMode detaillierte Logs
 
 ### 🔹 List-Files.ps1
 
-Erstellt eine vollständige Übersicht aller Ordner und Dateien im Projekt.
-
-* nutzt `Lib_ListFiles.ps1`
-* kann optional JSON-Datei `Projektstruktur.json` erzeugen
-* integriert Debug-Ausgaben mit `Write-DebugFile`
-* wird auch über Einstellungsmenü aufgerufen
-
----
+* Erstellt Übersicht aller Dateien & Ordner im Projekt
+* Nutzt `Lib_ListFiles.ps1`
+* Kann optional `Projektstruktur.json` erzeugen
 
 ### 🔹 Test_Systeminfo.ps1
 
-Internes Testmodul zur Überprüfung von:
-
-* `Get-SystemInfo`
-* `Set-DebugMode`
-* Schreib-/Lesezugriff auf `Systeminfo.json`
-  Nur für Debug- und Entwicklungszwecke.
-
----
+* Testet `Get-SystemInfo`, `Set-DebugMode`
+* Prüft Schreib-/Lesezugriff auf `Systeminfo.json`
 
 ### 🔹 Start_MasterSetup.cmd
-
-Batch-Datei zum schnellen Start des Systems ohne PowerShell-IDE.
-Startet Master_Controller.ps1 über PowerShell-Konsole:
 
 ```cmd
 powershell.exe -ExecutionPolicy Bypass -File ".\Master_Controller.ps1"
@@ -322,7 +276,9 @@ powershell.exe -ExecutionPolicy Bypass -File ".\Master_Controller.ps1"
 
 ---
 
-## 🧱 Versionsverwaltung & Commit-Regeln
+## 🧱 Versionsverwaltung
+
+Wenn neue Libraries oder Module entstehen, füge sie auch hier in die Dokumentation der jeweiligen Abschnitte hinzu, damit die Übersicht aktuell bleibt. & Commit-Regeln
 
 1️⃣ Code testen (PowerShell-Konsole oder VS Code)
 2️⃣ Nur funktionierende Versionen committen
@@ -360,6 +316,71 @@ Format:
 
 ---
 
-**Stand:** 18.10.2025
+## 🔧 Ergänzungen (18.10.2025)
+
+### 🏗️ Modul: Add-Baustelle.ps1 – Version MOD_V1.1.1
+
+* Neues, **systemunabhängiges JSON-Modell**: Zentrale Projektliste (`Projekte`) mit Unterobjekt `Info` (Benutzer, Computer, Pfad)
+* Ausgabeformat verbessert: **ASCII-Tabelle** mit fester Spaltenbreite, Datum ohne Uhrzeit
+* **Statusverwaltung integriert** (Aktiv / Abgeschlossen)
+* **Menüstruktur überarbeitet**: Hauptmenü mit Status-Zusammenfassung (aktive / abgeschlossene Projekte)
+* **DebugMode-Anzeige** integriert (via `Lib_Systeminfo.ps1`)
+
+---
+
+### 📘 Lib_Json.ps1
+
+* Neue Bibliothek zur JSON-Verwaltung (`Get-JsonFile`, `Save-JsonFile`, `Add-JsonEntry`)
+* Wird aktuell nur in `Add-Baustelle.ps1` eingesetzt
+* Weitere Module (`Check-System.ps1`, `Backup-Monitor.ps1`, `List-Files.ps1` etc.) müssen noch angepasst werden, um `Lib_Json` zu nutzen
+* Geplante Erweiterungen:
+
+  * Globale Integration in alle Module
+  * Automatische Backup-Erstellung vor jedem Schreibvorgang
+  * Fehlerbehandlung bei beschädigten oder leeren JSON-Dateien
+
+---
+
+### 🧭 Menü-Verbesserung (geplant)
+
+* Nach Ausführung einer Funktion soll das Menü **nicht sofort beenden**, sondern **eine Rückkehr zum vorherigen Menü** ermöglichen
+* Navigationserweiterung: "Zurück" / "Abbrechen" / "Hauptmenü"
+* Optionale Mehrstufigkeit: z. B. Untermenü „Projektverwaltung“
+
+---
+
+### 🧱 Erweiterungen für Add-Baustelle (geplant)
+
+* 🔹 **Projekt löschen** mit Sicherheitsabfrage
+* 🔹 **Projekt archivieren / wiederherstellen**
+* 🔹 **Projekte filtern / durchsuchen** nach Name, Datum oder Status
+* 🔹 **Automatische Sicherung / OneDrive-Sync** der Projektliste
+* 🔹 **Integration mit Add-BaustelleOrdner.ps1** für Ordnererstellung beim Anlegen
+* 🔹 **Migration alter JSON-Strukturen** (Benutzer/Computer-Verschachtelung → neues Format)
+* 🔹 **Optionale Statushistorie** (Statusänderungen mit Datum)
+
+---
+
+### 💾 Commit-Format (Standard)
+
+```
+[YYYY-MM-DD] MOD_Vx.x.x – Kurze Beschreibung
+• Punkt 1
+• Punkt 2
+• Punkt 3
+```
+
+---
+
+### 🧠 Merke
+
+* Commit-Format exakt beibehalten
+* Menü in `Add-Baustelle.ps1` so anpassen, dass Rückkehr zum Menü nach jeder Aktion möglich ist
+* `Lib_Json.ps1` aktuell nur in Add-Baustelle genutzt → Integration in weitere Module geplant
+* Erweiterungen für Add-Baustelle vorbereiten (Löschen, Archivieren, Filtern, Migration, Sync)
+
+---
+
 **Autor:** Herbert Schrotter
+**Stand:** 18.10.2025
 **Framework-Version:** SYS_V1.1.4
