@@ -25,7 +25,7 @@ Sie basiert auf dem aktuellen System-Framework (Stand: 18.10.2025).
 │   ├── Libs/                    ← zentrale Bibliotheken
 │   │   ├── Lib_Systeminfo.ps1
 │   │   ├── Lib_ListFiles.ps1
-│   │   └── (geplant) Lib_Debug.ps1
+│   │   └── Lib_Debug.ps1
 │   └── Modules/                 ← eigenständige Module
 │       ├── Add-Baustelle.ps1
 │       ├── Backup-Monitor.ps1
@@ -227,11 +227,13 @@ Hauptfunktion:
 
 ---
 
-### 🔹 Lib_Debug.ps1 *(optional, ab SYS_V1.4 geplant)*
+### 🔹 Lib_Debug.ps1
 
 * Zentrale Debug-Ausgabe- und Logging-Funktionen
 * `Write-DebugLog "Text"` → gibt Meldung nur bei aktivem DebugMode aus
-* `Write-DebugFile "Text"` → schreibt zusätzlich in `04_Logs\Debug.log`
+* `Write-DebugFile "Text"` → schreibt zusätzlich in `04_Logs\Debug_YYYY-MM-DD_HH-mm-ss.log`
+* Eine Logdatei pro Sitzung mit Zeitstempel
+* Automatische Sitzungsverwaltung mit Start-Header
 
 ---
 
@@ -265,6 +267,15 @@ Prüft Systemstatus und Setup-Integrität:
 * Kontrolle der Hauptordnerstruktur
 * Prüft `Systeminfo.json` und `Projektstruktur.json`
 * Gibt Statusberichte im Konsolenstil aus
+* Zeigt ExecutionPolicy und deren Bedeutung an:
+
+  | Wert             | Bedeutung                                                                  |
+  | ---------------- | -------------------------------------------------------------------------- |
+  | **Restricted**   | Keine Skripte dürfen laufen                                                |
+  | **AllSigned**    | Nur signierte Skripte dürfen laufen                                        |
+  | **RemoteSigned** | Lokale Skripte erlaubt, Internet-Skripte müssen signiert sein              |
+  | **Unrestricted** | Alles darf laufen (nur Warnungen bei Internet-Skripten)                    |
+  | **Bypass**       | Keine Prüfungen, alles erlaubt (wird oft für interne Frameworks verwendet) |
 
 ---
 
@@ -274,6 +285,7 @@ Wird automatisch gestartet, wenn `Systeminfo.json` fehlt.
 
 * erkennt Benutzername, Computername, Systempfade
 * erzeugt neue `Systeminfo.json`
+* schreibt bei aktivem DebugMode detaillierte Logs über jeden Schritt
 
 ---
 
@@ -283,6 +295,7 @@ Erstellt eine vollständige Übersicht aller Ordner und Dateien im Projekt.
 
 * nutzt `Lib_ListFiles.ps1`
 * kann optional JSON-Datei `Projektstruktur.json` erzeugen
+* integriert Debug-Ausgaben mit `Write-DebugFile`
 * wird auch über Einstellungsmenü aufgerufen
 
 ---
