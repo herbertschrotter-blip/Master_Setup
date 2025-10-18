@@ -1,7 +1,7 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.0.6
-# Zweck:   Verwaltung der Projektliste (Neue Baustelle, Liste anzeigen, Status ändern)
+# Version: MOD_V1.0.6a
+# Zweck:   Verwaltung der Projektliste (Neue Baustelle, Liste anzeigen, Status ändern – mit Menüauswahl)
 # Autor:   Herbert Schrotter
 # Datum:   18.10.2025
 # ============================================================
@@ -205,13 +205,22 @@ switch ($wahl) {
             return
         }
 
-        $newStatus = Read-Host "Neuen Status eingeben (aktiv/abgeschlossen)"
-        if ($newStatus -notin @("aktiv","abgeschlossen")) {
-            Write-Host "⚠️  Ungültiger Status – nur 'aktiv' oder 'abgeschlossen' erlaubt." -ForegroundColor Yellow
-            return
+        # Neue Statusauswahl per Menü
+        Write-Host "`nStatus ändern auf:"
+        Write-Host "1️⃣  Aktiv"
+        Write-Host "2️⃣  Abgeschlossen"
+        $statusWahl = Read-Host "Bitte Auswahl eingeben (1–2)"
+
+        switch ($statusWahl) {
+            "1" { $newStatus = "Aktiv" }
+            "2" { $newStatus = "Abgeschlossen" }
+            default {
+                Write-Host "⚠️  Ungültige Auswahl. Vorgang abgebrochen." -ForegroundColor Yellow
+                return
+            }
         }
 
-        $projekte[$index].Status = (Get-Culture).TextInfo.ToTitleCase($newStatus)
+        $projekte[$index].Status = $newStatus
         Save-JsonFile -Data $data -Path $projektListePath
         Write-Host "`n✅ Status von Projekt '$($projekte[$index].Name)' wurde geändert auf '$($projekte[$index].Status)'."
     }
