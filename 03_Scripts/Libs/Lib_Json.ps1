@@ -109,11 +109,22 @@ function Add-JsonEntry {
 
     try {
         $jsonData = Get-JsonFile -Path $Path -CreateIfMissing
+
+        # Sicherstellen, dass es sich um ein Array handelt
         if (-not ($jsonData -is [System.Collections.IEnumerable])) {
+            Write-DebugMsg "Konvertiere vorhandene JSON-Daten in Array."
+            $jsonData = @($jsonData)
+        }
+
+        # Prüfen, ob JSON leer ist (z. B. {})
+        if ($jsonData.Count -eq 1 -and -not $jsonData[0]) {
             $jsonData = @()
         }
 
+        # Eintrag anhängen
         $jsonData += $Entry
+
+        # Speichern
         Save-JsonFile -Data $jsonData -Path $Path
         Write-DebugMsg "Eintrag zu JSON-Datei hinzugefügt: ${Path}"
     }
