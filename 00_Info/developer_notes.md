@@ -276,6 +276,23 @@ powershell.exe -ExecutionPolicy Bypass -File ".\Master_Controller.ps1"
 
 ---
 
+## 🔗 Modul-Library-Beziehungen
+
+| Modul / Datei              | Verwendete Libraries                     | Beschreibung der Zusammenarbeit                       |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| **Master_Controller.ps1**  | Lib_Systeminfo, Lib_Debug                | Systeminitialisierung, DebugMode-Anzeige              |
+| **Add-Baustelle.ps1**      | Lib_Systeminfo, Lib_Json, Lib_Debug      | JSON-Verwaltung, Benutzer-/Systeminfo, Debug-Ausgaben |
+| **Menu-Einstellungen.ps1** | Lib_Systeminfo, Lib_ListFiles            | Menülogik, System- und Strukturprüfung                |
+| **Check-System.ps1**       | Lib_Systeminfo, Lib_Debug, Lib_ListFiles | Systemstatusanalyse, Ausgabeprotokoll                 |
+| **Detect-System.ps1**      | Lib_Systeminfo, Lib_Debug                | Automatische Systemregistrierung                      |
+| **List-Files.ps1**         | Lib_ListFiles, Lib_Debug                 | Projektstruktur erfassen und ausgeben                 |
+| **Test_Systeminfo.ps1**    | Lib_Systeminfo, Lib_Debug                | Funktionstest der Systemerkennung                     |
+| **Backup-Monitor.ps1**     | Lib_Json, Lib_Debug                      | Geplante Integration für Projektsicherungen           |
+
+Diese Übersicht zeigt die aktuelle Zuordnung der Module zu ihren Bibliotheken. Sie dient als Orientierung für zukünftige Erweiterungen, um Abhängigkeiten klar zu dokumentieren.
+
+---
+
 ## 🧱 Versionsverwaltung
 
 Wenn neue Libraries oder Module entstehen, füge sie auch hier in die Dokumentation der jeweiligen Abschnitte hinzu, damit die Übersicht aktuell bleibt. & Commit-Regeln
@@ -359,42 +376,43 @@ Format:
 * 🔹 **Migration alter JSON-Strukturen** (Benutzer/Computer-Verschachtelung → neues Format)
 * 🔹 **Optionale Statushistorie** (Statusänderungen mit Datum)
 
-🏢 Geplanter „Firmenmodus“ (Systemkompatibilität)
-
-Ziel:
-Das Master Setup automatisch an eingeschränkte Firmenumgebungen anpassen (z. B. ExecutionPolicy, Schreibrechte, OneDrive-Richtlinien).
-
-Funktionen (geplant):
-
-🔹 Automatische Erkennung von restriktiven PowerShell-Richtlinien
-→ Wechsel in Read-Only-Modus, wenn Skriptausführung blockiert
-
-🔹 Prüfung auf Schreibrechte im Projektverzeichnis
-→ ggf. Umleitung in %USERPROFILE%\Documents\Master_Setup
-
-🔹 Optionale Verwendung einer portablen PowerShell-7-Instanz
-→ Start über .\pwsh\pwsh.exe -ExecutionPolicy Bypass
-
-🔹 Anzeige einer Warnung bei eingeschränkter Umgebung (z. B. „Firmenmodus aktiv“)
-
-🔹 Zentrale Steuerung über Lib_Systeminfo.ps1
-→ Detect-System.ps1 erkennt „Firmenmodus“ automatisch und setzt Flag $sysInfo.Firmenmodus = $true
-
-Spätere Integration:
-
-Im Hauptmenü (Master_Controller.ps1) optional Anzeige:
-
-if ($sysInfo.Firmenmodus) {
-    Write-Host '🏢 Firmenmodus aktiv (eingeschränkte Umgebung)' -ForegroundColor DarkYellow
-}
-
-Vorteil:
-Das gesamte Framework bleibt voll funktionsfähig, selbst wenn PowerShell auf Firmenrechnern stark reglementiert ist.
-
---- (Standard)
 ---
 
-### 💾 Commit-Format (Standard)
+### 🏢 Geplanter „Firmenmodus“ (Systemkompatibilität)
+
+**Ziel:**
+Das Master Setup automatisch an eingeschränkte Firmenumgebungen anpassen (z. B. ExecutionPolicy, Schreibrechte, OneDrive-Richtlinien).
+
+**Funktionen (geplant):**
+
+* 🔹 Automatische Erkennung von restriktiven PowerShell-Richtlinien
+  → Wechsel in *Read-Only-Modus*, wenn Skriptausführung blockiert
+* 🔹 Prüfung auf Schreibrechte im Projektverzeichnis
+  → ggf. Umleitung in `%USERPROFILE%\Documents\Master_Setup`
+* 🔹 Optionale Verwendung einer portablen PowerShell-7-Instanz
+  → Start über `.\pwsh\pwsh.exe -ExecutionPolicy Bypass`
+* 🔹 Anzeige einer Warnung bei eingeschränkter Umgebung (z. B. „Firmenmodus aktiv“)
+* 🔹 Zentrale Steuerung über `Lib_Systeminfo.ps1`
+  → `Detect-System.ps1` erkennt „Firmenmodus“ automatisch und setzt Flag `$sysInfo.Firmenmodus = $true`
+
+**Spätere Integration:**
+
+* Im Hauptmenü (`Master_Controller.ps1`) optional Anzeige:
+
+  ```powershell
+  if ($sysInfo.Firmenmodus) {
+      Write-Host '🏢 Firmenmodus aktiv (eingeschränkte Umgebung)' -ForegroundColor DarkYellow
+  }
+  ```
+
+**Vorteil:**
+Das gesamte Framework bleibt **voll funktionsfähig**, selbst wenn PowerShell auf Firmenrechnern stark reglementiert ist.
+
+---
+
+### 💾 Commit-Format
+
+(Standard)
 
 ```
 [YYYY-MM-DD] MOD_Vx.x.x – Kurze Beschreibung
