@@ -1,6 +1,6 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.1.0
+# Version: MOD_V1.1.1
 # Zweck:   Systemunabhängige Projektliste mit Benutzer-/Computerinfos
 # Autor:   Herbert Schrotter
 # Datum:   18.10.2025
@@ -140,10 +140,19 @@ switch ($wahl) {
             return
         }
 
+        # Spaltenformatierung (ASCII-basiert)
+        $fmtHeader = "{0,-28} | {1,-12} | {2,-10}"
+        $fmtRow    = "- {0,-28} | {1,-12} | {2,-10}"
+
+        Write-Host ($fmtHeader -f "Projekt", "Status", "Datum") -ForegroundColor Gray
+        Write-Host ("-" * 28 + "-+-" + "-" * 12 + "-+-" + "-" * 10)
+
         foreach ($p in $data.Projekte) {
-            # Nur Datum (ohne Uhrzeit)
-            $datumKurz = ($p.Datum -split ' ')[0]
-            Write-Host ("• {0,-25} | {1,-10} | {2}" -f $p.Name, $p.Status, $datumKurz)
+            $name = [string]$p.Name
+            if ($name.Length -gt 28) { $name = $name.Substring(0,27) + "…" }
+            $status = [string]$p.Status
+            $datumKurz = ([string]$p.Datum).Split(" ")[0]
+            Write-Host ($fmtRow -f $name, $status, $datumKurz)
         }
     }
 
@@ -164,11 +173,13 @@ switch ($wahl) {
         }
 
         Write-Host "📋  Vorhandene Projekte:`n"
+        $fmtRowSel = "[{0}] {1,-25} | Status: {2}"
         for ($i = 0; $i -lt $data.Projekte.Count; $i++) {
             $p = $data.Projekte[$i]
-            $indexStr = ("[{0}]" -f $i).PadRight(5)
-         Write-Host ("{0}{1,-25} | Status: {2}" -f $indexStr, $p.Name, $p.Status)
-}
+            $name = [string]$p.Name
+            if ($name.Length -gt 25) { $name = $name.Substring(0,24) + "…" }
+            Write-Host ($fmtRowSel -f $i, $name, $p.Status)
+        }
 
         $index = Read-Host "`n🔢  Bitte Projektnummer auswählen"
         if ($index -notmatch '^\d+$' -or [int]$index -ge $data.Projekte.Count) {
