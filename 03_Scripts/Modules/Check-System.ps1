@@ -69,4 +69,4 @@ Write-Debug "Execution Policy geprüft: $policy" -Prefix "Check-System"
 # ------------------------------------------------------------
 Write-Host "`nSystemprüfung abgeschlossen.`n" -ForegroundColor Cyan
 Write-Debug "Systemprüfung abgeschlossen." -Prefix "Check-System"
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 10
