@@ -359,6 +359,39 @@ Format:
 * 🔹 **Migration alter JSON-Strukturen** (Benutzer/Computer-Verschachtelung → neues Format)
 * 🔹 **Optionale Statushistorie** (Statusänderungen mit Datum)
 
+🏢 Geplanter „Firmenmodus“ (Systemkompatibilität)
+
+Ziel:
+Das Master Setup automatisch an eingeschränkte Firmenumgebungen anpassen (z. B. ExecutionPolicy, Schreibrechte, OneDrive-Richtlinien).
+
+Funktionen (geplant):
+
+🔹 Automatische Erkennung von restriktiven PowerShell-Richtlinien
+→ Wechsel in Read-Only-Modus, wenn Skriptausführung blockiert
+
+🔹 Prüfung auf Schreibrechte im Projektverzeichnis
+→ ggf. Umleitung in %USERPROFILE%\Documents\Master_Setup
+
+🔹 Optionale Verwendung einer portablen PowerShell-7-Instanz
+→ Start über .\pwsh\pwsh.exe -ExecutionPolicy Bypass
+
+🔹 Anzeige einer Warnung bei eingeschränkter Umgebung (z. B. „Firmenmodus aktiv“)
+
+🔹 Zentrale Steuerung über Lib_Systeminfo.ps1
+→ Detect-System.ps1 erkennt „Firmenmodus“ automatisch und setzt Flag $sysInfo.Firmenmodus = $true
+
+Spätere Integration:
+
+Im Hauptmenü (Master_Controller.ps1) optional Anzeige:
+
+if ($sysInfo.Firmenmodus) {
+    Write-Host '🏢 Firmenmodus aktiv (eingeschränkte Umgebung)' -ForegroundColor DarkYellow
+}
+
+Vorteil:
+Das gesamte Framework bleibt voll funktionsfähig, selbst wenn PowerShell auf Firmenrechnern stark reglementiert ist.
+
+--- (Standard)
 ---
 
 ### 💾 Commit-Format (Standard)
