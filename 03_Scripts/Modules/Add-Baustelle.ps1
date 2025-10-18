@@ -141,8 +141,9 @@ switch ($wahl) {
         }
 
         foreach ($p in $data.Projekte) {
-            Write-Host ("• {0,-25} | {1,-13} | {2} | {3}\{4}" -f `
-                $p.Name, $p.Status, $p.Datum, $p.Info.Benutzer, $p.Info.Computer)
+            # Nur Datum (ohne Uhrzeit)
+            $datumKurz = ($p.Datum -split ' ')[0]
+            Write-Host ("• {0,-25} | {1,-10} | {2}" -f $p.Name, $p.Status, $datumKurz)
         }
     }
 
@@ -165,8 +166,9 @@ switch ($wahl) {
         Write-Host "📋  Vorhandene Projekte:`n"
         for ($i = 0; $i -lt $data.Projekte.Count; $i++) {
             $p = $data.Projekte[$i]
-            Write-Host ("[{0}] {1,-25} | Status: {2}" -f $i, $p.Name, $p.Status)
-        }
+            $indexStr = ("[{0}]" -f $i).PadRight(5)
+         Write-Host ("{0}{1,-25} | Status: {2}" -f $indexStr, $p.Name, $p.Status)
+}
 
         $index = Read-Host "`n🔢  Bitte Projektnummer auswählen"
         if ($index -notmatch '^\d+$' -or [int]$index -ge $data.Projekte.Count) {
