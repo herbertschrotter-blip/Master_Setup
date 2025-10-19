@@ -1,6 +1,6 @@
 # ============================================================
 # Modul: Add-Baustelle.ps1
-# Version: MOD_V1.1.2
+# Version: MOD_V1.1.3
 # Zweck:   Systemunabhängige Projektliste mit Benutzer-/Computerinfos
 # Autor:   Herbert Schrotter
 # Datum:   19.10.2025
@@ -18,67 +18,6 @@ try {
 catch {
     Write-Host "❌ Fehler beim Laden benötigter Bibliotheken: $($_.Exception.Message)" -ForegroundColor Red
     return
-}
-
-# ------------------------------------------------------------
-# 🪲 DebugMode-Hinweis
-# ------------------------------------------------------------
-if (Get-DebugMode) {
-    Write-Host "🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow
-}
-
-# ------------------------------------------------------------
-# 📊 Status-Zusammenfassung
-# ------------------------------------------------------------
-$projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
-$aktiveCount = 0
-$abgeschlCount = 0
-if (Test-Path $projektListePath) {
-    try {
-        $data = Get-JsonFile -Path $projektListePath
-        foreach ($p in $data.Projekte) {
-            if ($p.Status -eq "Aktiv") { $aktiveCount++ }
-            elseif ($p.Status -eq "Abgeschlossen") { $abgeschlCount++ }
-        }
-    }
-    catch {
-        Write-Host "⚠️  Konnte Projektliste nicht auslesen." -ForegroundColor Yellow
-    }
-}
-
-# ------------------------------------------------------------
-# 📋 Dynamische Menüschleife: Titel vor JEDEM Durchlauf neu
-# ------------------------------------------------------------
-while ($true) {
-    # Status neu zählen
-    $aktiveCount = 0; $abgeschlCount = 0
-    if (Test-Path $projektListePath) {
-        try {
-            $data = Get-JsonFile -Path $projektListePath
-            foreach ($p in $data.Projekte) {
-                if ($p.Status -eq "Aktiv") { $aktiveCount++ }
-                elseif ($p.Status -eq "Abgeschlossen") { $abgeschlCount++ }
-            }
-        } catch {
-            Write-Host "⚠️  Konnte Projektliste nicht auslesen." -ForegroundColor Yellow
-        }
-    }
-
-    # Titel mit Live-Zeile
-    $menuTitle = "🏗️  PROJEKTVERWALTUNG`n📊 Aktive: $aktiveCount | Abgeschlossene: $abgeschlCount"
-
-    # Menü EINMAL anzeigen, Aktion ausführen, zurückkehren
-    $choice = Show-SubMenu -MenuTitle $menuTitle -Options @{
-        "1" = "Neue Baustelle anlegen|Add-NewProject"
-        "2" = "Projektliste anzeigen|Show-ProjectList"
-        "3" = "Projektstatus ändern|Change-ProjectStatus"
-    } -ReturnAfterAction
-
-    # Bei „Zurück“ -> Schleife verlassen
-    if ($choice -eq "0") { break }
-
-    # andernfalls: eine Aktion wurde ausgeführt -> Schleife iteriert erneut,
-    # zählt neu und zeichnet den Titel frisch -> Live-Aktualisierung ✅
 }
 
 # ------------------------------------------------------------
@@ -191,6 +130,45 @@ function Change-ProjectStatus {
     $data.Projekte[$index].Status = $newStatus
     Save-JsonFile -Data $data -Path $projektListePath
     Write-Host "`n✅ Status von Projekt '$($data.Projekte[$index].Name)' wurde geändert auf '$newStatus'."
+}
+
+# ------------------------------------------------------------
+# 🪲 DebugMode-Hinweis
+# ------------------------------------------------------------
+if (Get-DebugMode) {
+    Write-Host "🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow
+}
+
+# ------------------------------------------------------------
+# 📊 Status-Zusammenfassung & dynamisches Menü
+# ------------------------------------------------------------
+$projektListePath = Join-Path -Path $sysInfo.Systempfade.RootPath -ChildPath "01_Config\Projektliste.json"
+
+while ($true) {
+    # Aktuelle Statuswerte zählen
+    $aktiveCount = 0; $abgeschlCount = 0
+    if (Test-Path $projektListePath) {
+        try {
+            $data = Get-JsonFile -Path $projektListePath
+            foreach ($p in $data.Projekte) {
+                if ($p.Status -eq "Aktiv") { $aktiveCount++ }
+                elseif ($p.Status -eq "Abgeschlossen") { $abgeschlCount++ }
+            }
+        } catch {
+            Write-Host "⚠️  Konnte Projektliste nicht auslesen." -ForegroundColor Yellow
+        }
+    }
+
+    # Menü anzeigen mit aktualisiertem Titel
+    $menuTitle = "🏗️  PROJEKTVERWALTUNG`n📊 Aktive: $aktiveCount | Abgeschlossene: $abgeschlCount"
+
+    $choice = Show-SubMenu -MenuTitle $menuTitle -Options @{
+        "1" = "Neue Baustelle anlegen|Add-NewProject"
+        "2" = "Projektliste anzeigen|Show-ProjectList"
+        "3" = "Projektstatus ändern|Change-ProjectStatus"
+    } -ReturnAfterAction
+
+    if ($choice -eq "0") { break }
 }
 
 # ------------------------------------------------------------
