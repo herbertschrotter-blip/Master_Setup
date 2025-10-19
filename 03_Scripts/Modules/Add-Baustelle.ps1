@@ -47,13 +47,11 @@ if (Test-Path $projektListePath) {
 }
 
 # ------------------------------------------------------------
-# 📋 Dynamische Menüschleife mit Statusaktualisierung
+# 📋 Dynamische Menüschleife: Titel vor JEDEM Durchlauf neu
 # ------------------------------------------------------------
 while ($true) {
-
     # Status neu zählen
-    $aktiveCount = 0
-    $abgeschlCount = 0
+    $aktiveCount = 0; $abgeschlCount = 0
     if (Test-Path $projektListePath) {
         try {
             $data = Get-JsonFile -Path $projektListePath
@@ -61,24 +59,26 @@ while ($true) {
                 if ($p.Status -eq "Aktiv") { $aktiveCount++ }
                 elseif ($p.Status -eq "Abgeschlossen") { $abgeschlCount++ }
             }
-        }
-        catch {
+        } catch {
             Write-Host "⚠️  Konnte Projektliste nicht auslesen." -ForegroundColor Yellow
         }
     }
 
-    # Titel dynamisch mit aktuellen Werten
+    # Titel mit Live-Zeile
     $menuTitle = "🏗️  PROJEKTVERWALTUNG`n📊 Aktive: $aktiveCount | Abgeschlossene: $abgeschlCount"
 
-    # Menü anzeigen
-    Show-SubMenu -MenuTitle $menuTitle -Options @{
+    # Menü EINMAL anzeigen, Aktion ausführen, zurückkehren
+    $choice = Show-SubMenu -MenuTitle $menuTitle -Options @{
         "1" = "Neue Baustelle anlegen|Add-NewProject"
         "2" = "Projektliste anzeigen|Show-ProjectList"
         "3" = "Projektstatus ändern|Change-ProjectStatus"
-    }
+    } -ReturnAfterAction
 
-    # Wenn Benutzer „Zurück“ wählt → Schleife beenden
-    break
+    # Bei „Zurück“ -> Schleife verlassen
+    if ($choice -eq "0") { break }
+
+    # andernfalls: eine Aktion wurde ausgeführt -> Schleife iteriert erneut,
+    # zählt neu und zeichnet den Titel frisch -> Live-Aktualisierung ✅
 }
 
 # ------------------------------------------------------------
