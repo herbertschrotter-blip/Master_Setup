@@ -15,36 +15,38 @@ Die Struktur deiner JSON-Ausgabe zeigt alle relevanten Dateien und Ordner deines
 
 ```plaintext
 00_MASTER_SETUP/
-├── .vscode/                     ← Editor-Einstellungen (launch.json etc.)
-│   └── launch.json
-├── .gitignore                   ← Git-Ausschlussregeln
-├── 00_Info/                     ← Changelog, Dokumentation
-├── 01_Config/                   ← System- und Laufzeitdaten (.json, .txt)
-│   ├── Projektstruktur.json
-│   └── Systeminfo.json
-├── 02_Templates/                ← Vorlagen (Excel, Word, CAD usw.)
+├── .vscode/ ← Editor-Einstellungen (launch.json etc.)
+│ └── launch.json
+├── .gitignore ← Git-Ausschlussregeln
+├── 00_Info/ ← Changelog, Dokumentation
+├── 01_Config/ ← System- und Laufzeitdaten (.json, .txt)
+│ ├── Projektstruktur.json
+│ └── Systeminfo.json
+├── 02_Templates/ ← Vorlagen (Excel, Word, CAD usw.)
 ├── 03_Scripts/
-│   ├── Libs/                    ← zentrale Bibliotheken
-│   │   ├── Lib_Systeminfo.ps1
-│   │   ├── Lib_ListFiles.ps1
-│   │   ├── Lib_Debug.ps1
-│   │   └── Lib_Json.ps1
-│   └── Modules/                 ← eigenständige Module
-│       ├── Add-Baustelle.ps1
-│       ├── Backup-Monitor.ps1
-│       ├── Check-System.ps1
-│       ├── Detect-System.ps1
-│       ├── List-Files.ps1
-│       ├── Menu-Einstellungen.ps1
-│       ├── Show-Logs.ps1
-│       ├── Test_Systeminfo.ps1
-│       └── Update-Vorlagen.ps1
-├── 04_Logs/                     ← lokale Logausgaben (nicht committen)
-├── 05_Backup/                   ← Sicherungen (nicht committen)
-├── developer_notes.md            ← Entwickler-Dokumentation (diese Datei)
-├── Master_Controller.ps1         ← Zentrale Steuerung (Hauptmenü)
-├── README.md                     ← Überblick und Kurzbeschreibung
-└── Start_MasterSetup.cmd         ← Startdatei (öffnet Master_Controller über CMD)
+│ ├── Libs/ ← zentrale Bibliotheken
+│ │ ├── Lib_Systeminfo.ps1
+│ │ ├── Lib_ListFiles.ps1
+│ │ ├── Lib_Debug.ps1
+│ │ ├── Lib_Json.ps1
+│ │ └── Lib_Menu.ps1
+│ └── Modules/ ← eigenständige Module
+│ ├── Add-Baustelle.ps1
+│ ├── Backup-Monitor.ps1
+│ ├── Check-System.ps1
+│ ├── Detect-System.ps1
+│ ├── List-Files.ps1
+│ ├── Menu-Einstellungen.ps1
+│ ├── Show-Logs.ps1
+│ ├── Test_Systeminfo.ps1
+│ ├── Toggle-Debug.ps1
+│ └── Update-Vorlagen.ps1
+├── 04_Logs/ ← lokale Logausgaben (nicht committen)
+├── 05_Backup/ ← Sicherungen (nicht committen)
+├── developer_notes.md ← Entwickler-Dokumentation (diese Datei)
+├── Master_Controller.ps1 ← Zentrale Steuerung (Hauptmenü)
+├── README.md ← Überblick und Kurzbeschreibung
+└── Start_MasterSetup.cmd ← Startdatei (öffnet Master_Controller über CMD)
 ```
 
 ---
@@ -222,6 +224,16 @@ Hauptfunktion:
 
 ---
 
+### 🔹 Lib_Menu.ps1
+
+* Zentrale Menülogik für alle Module
+* Unterstützt Show-SubMenu mit Parameter -ReturnAfterAction
+* Sortiert Menüoptionen numerisch/alphabetisch
+* Globale Beenden-Funktion über Eingabe X
+* Zeigt Debug-Hinweis nur, wenn aktiv
+
+---
+
 ## 🧩 Modul-Übersicht
 
 ### 🔹 Add-Baustelle.ps1
@@ -358,11 +370,20 @@ Format:
 
 ---
 
-### 🧭 Menü-Verbesserung (geplant)
+🧭 System- und Menü-Stabilisierung – Oktober 2025
+🔹 Ziel
 
-* Nach Ausführung einer Funktion soll das Menü **nicht sofort beenden**, sondern **eine Rückkehr zum vorherigen Menü** ermöglichen
-* Navigationserweiterung: "Zurück" / "Abbrechen" / "Hauptmenü"
-* Optionale Mehrstufigkeit: z. B. Untermenü „Projektverwaltung“
+Nach dem Zurücksetzen auf Commit dd5746e wurde das gesamte PowerShell Master Setup-System stabilisiert, das Menüsystem vereinheitlicht und die Modulstruktur optimiert.
+
+⚙️ Änderungen im Detail
+
+Lib_Menu.ps1 (LIB_V1.0.5) – X-Beenden, sortierte Ausgabe, ReturnAfterAction
+
+Menu-Einstellungen.ps1 (MENU_V1.0.4) – Nutzung zentraler Menülogik
+
+Master_Controller.ps1 (SYS_V1.1.6) – Beenden über X, DebugMode-Off nur beim Exit
+
+Add-Baustelle.ps1 (MOD_V1.1.3) – Funktionsreihenfolge korrigiert, Live-Status
 
 ---
 
@@ -432,6 +453,6 @@ Das gesamte Framework bleibt **voll funktionsfähig**, selbst wenn PowerShell au
 
 ---
 
-**Autor:** Herbert Schrotter
-**Stand:** 18.10.2025
-**Framework-Version:** SYS_V1.1.4
+Autor: Herbert Schrotter
+Stand: 19.10.2025
+Framework-Version: SYS_V1.1.6

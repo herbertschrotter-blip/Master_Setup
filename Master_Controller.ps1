@@ -1,10 +1,9 @@
 # ============================================================
 # 🧭 MASTER SETUP – SYSTEMSTART
-# Version: SYS_V1.1.4
-# ============================================================
+# Version: SYS_V1.1.5
 # Zweck:   Hauptmenü des PowerShell Master Setup Systems
 # Autor:   Herbert Schrotter
-# Datum:   17.10.2025
+# Datum:   19.10.2025
 # ============================================================
 
 # ------------------------------------------------------------
@@ -21,34 +20,43 @@ catch {
 }
 
 # ------------------------------------------------------------
+# 🪲 DebugMode prüfen (nur anzeigen, wenn aktiv)
+# ------------------------------------------------------------
+try {
+    $debugMode = Get-DebugMode
+}
+catch {
+    $debugMode = $false
+}
+
+# ------------------------------------------------------------
 # 🧭 Hauptmenü anzeigen
 # ------------------------------------------------------------
 Clear-Host
 
-# 🔹 Debug-Hinweis anzeigen, wenn aktiv
-if (Get-DebugMode) {
-    Write-Host ""
+Write-Host "=============================================" -ForegroundColor Cyan
+Write-Host "        🧭 MASTER SETUP - HAUPTMENÜ          " -ForegroundColor Yellow
+Write-Host "=============================================" -ForegroundColor Cyan
+
+if ($debugMode) {
     Write-Host "🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow
     Write-Host ""
 }
 
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "        🧭 MASTER SETUP - HAUPTMENÜ          " -ForegroundColor Yellow
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host ""
 Write-Host "1 - Neue Baustelle anlegen"
 Write-Host "2 - Vorlagen aktualisieren"
 Write-Host "3 - Backup prüfen"
 Write-Host "4 - Logdateien anzeigen"
 Write-Host "5 - Einstellungen"
-Write-Host "6 - Beenden"
+Write-Host ""
+Write-Host "X - Programm beenden"
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
 
 # ------------------------------------------------------------
 # 📥 Benutzerabfrage & Modulstart
 # ------------------------------------------------------------
-$wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"
+$wahl = Read-Host "Bitte eine Zahl eingeben (1–5 oder X zum Beenden)"
 
 function Start-Module($name) {
     $path = "$PSScriptRoot\03_Scripts\Modules\$name.ps1"
@@ -60,16 +68,15 @@ function Start-Module($name) {
     }
 }
 
-switch ($wahl) {
+switch ($wahl.ToUpper()) {
     "1" { Start-Module "Add-Baustelle" }
     "2" { Start-Module "Update-Vorlagen" }
     "3" { Start-Module "Backup-Monitor" }
     "4" { Start-Module "Show-Logs" }
     "5" { & "$PSScriptRoot\03_Scripts\Modules\Menu-Einstellungen.ps1" }
-    "6" {
+    "X" {
         Write-Host "`n👋  Programm wird beendet..." -ForegroundColor Yellow
-        # 🔧 Nur hier DebugMode deaktivieren
-        Set-DebugMode -Value $false
+        try { Set-DebugMode -Value $false } catch {}
         Start-Sleep -Seconds 1
         exit
     }
@@ -83,4 +90,3 @@ switch ($wahl) {
 Write-Host "`n=============================================" -ForegroundColor Cyan
 Write-Host "📘 Master Controller wurde korrekt ausgeführt." -ForegroundColor Green
 Write-Host "=============================================`n" -ForegroundColor Cyan
-
