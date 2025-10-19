@@ -53,9 +53,12 @@ function Show-SubMenu {
         Write-Host "============================================="
         if ($debugMode) { Write-Host "🪲 DEBUG-MODE AKTIVIERT`n" -ForegroundColor DarkYellow }
 
-        foreach ($key in $Options.Keys) {
+        foreach ($key in ($Options.Keys | Sort-Object {
+            if ($_ -match '^\d+$') { [int]$_ } else { $_ }
+            })) {
             Write-Host "$key - $($Options[$key].Split('|')[0])"
-        }
+    }
+
 
         Write-Host "`n0 - Zurück zum vorherigen Menü"
         Write-Host "X - Komplett beenden"
