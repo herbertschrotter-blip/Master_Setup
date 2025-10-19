@@ -48,14 +48,15 @@ Write-Host "2 - Vorlagen aktualisieren"
 Write-Host "3 - Backup prüfen"
 Write-Host "4 - Logdateien anzeigen"
 Write-Host "5 - Einstellungen"
-Write-Host "6 - Beenden"
+Write-Host ""
+Write-Host "X - Programm beenden"
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
 
 # ------------------------------------------------------------
 # 📥 Benutzerabfrage & Modulstart
 # ------------------------------------------------------------
-$wahl = Read-Host "Bitte eine Zahl eingeben (1–6)"
+$wahl = Read-Host "Bitte eine Zahl eingeben (1–5 oder X zum Beenden)"
 
 function Start-Module($name) {
     $path = "$PSScriptRoot\03_Scripts\Modules\$name.ps1"
@@ -67,21 +68,15 @@ function Start-Module($name) {
     }
 }
 
-switch ($wahl) {
+switch ($wahl.ToUpper()) {
     "1" { Start-Module "Add-Baustelle" }
     "2" { Start-Module "Update-Vorlagen" }
     "3" { Start-Module "Backup-Monitor" }
     "4" { Start-Module "Show-Logs" }
     "5" { & "$PSScriptRoot\03_Scripts\Modules\Menu-Einstellungen.ps1" }
-    "6" {
+    "X" {
         Write-Host "`n👋  Programm wird beendet..." -ForegroundColor Yellow
-        # 🔧 Nur hier DebugMode deaktivieren
-        try {
-            Set-DebugMode -Value $false
-        }
-        catch {
-            Write-Host "⚠️  DebugMode konnte nicht deaktiviert werden: $($_.Exception.Message)" -ForegroundColor Red
-        }
+        try { Set-DebugMode -Value $false } catch {}
         Start-Sleep -Seconds 1
         exit
     }
