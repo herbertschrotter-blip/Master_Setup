@@ -47,9 +47,11 @@ if (Test-Path $projektListePath) {
 }
 
 # ------------------------------------------------------------
-# 📋 Menüdefinition mit zentraler Library
+# 📋 Menüdefinition mit Statuszeile im Titel
 # ------------------------------------------------------------
-Show-SubMenu -MenuTitle "🏗️  PROJEKTVERWALTUNG" -Options @{
+$menuTitle = "🏗️  PROJEKTVERWALTUNG`n📊 Aktive: $aktiveCount | Abgeschlossene: $abgeschlCount"
+
+Show-SubMenu -MenuTitle $menuTitle -Options @{
     "1" = "Neue Baustelle anlegen|Add-NewProject"
     "2" = "Projektliste anzeigen|Show-ProjectList"
     "3" = "Projektstatus ändern|Change-ProjectStatus"
