@@ -1,13 +1,13 @@
 # ============================================================
 # Library: Lib_Menu.ps1
-# Version: LIB_V1.0.0
+# Version: LIB_V1.0.2
 # Zweck:   Einheitliche Menüführung mit Rückkehrfunktion
 # Autor:   Herbert Schrotter
 # Datum:   19.10.2025
 # ============================================================
 
 # ------------------------------------------------------------
-# 🧠 Systeminfo & DebugMode
+# 🧠 Systeminfo & DebugMode initial laden
 # ------------------------------------------------------------
 try {
     . "$PSScriptRoot\Lib_Systeminfo.ps1"
@@ -52,35 +52,59 @@ function Show-SubMenu {
 
     while ($true) {
         Clear-Host
+
+        # 🧠 DebugMode neu prüfen (live in jeder Schleife)
+        try {
+            $debugMode = Get-DebugMode
+        }
+        catch {
+            $debugMode = $false
+        }
+
+        # --------------------------------------------------------
+        # 🧾 Menüanzeige mit optionalem Debug-Hinweis
+        # --------------------------------------------------------
         Write-Host "============================================="
         Write-Host "        $MenuTitle"
         Write-Host "============================================="
+
+        if ($debugMode) {
+            Write-Host "🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow
+            Write-Host ""
+        }
 
         foreach ($key in $Options.Keys) {
             Write-Host "$key - $($Options[$key].Split('|')[0])"
         }
 
         Write-Host "`n0 - Zurück zum vorherigen Menü"
-        if ($debugMode) { Write-Host "`n🪲 DEBUG-MODE AKTIVIERT" -ForegroundColor DarkYellow }
 
+        # --------------------------------------------------------
+        # 🧮 Benutzereingabe
+        # --------------------------------------------------------
         $choice = Read-Host "`nBitte Auswahl eingeben"
 
         if ($choice -eq "0" -or $choice -eq "z") { break }
 
         if ($Options.ContainsKey($choice)) {
             $action = $Options[$choice].Split('|')[1]
-            if ($debugMode) { Write-Host "→ Ausführung: $action" -ForegroundColor DarkGray }
+
+            if ($debugMode) {
+                Write-Host "→ Ausführung: $action" -ForegroundColor DarkGray
+            }
+
             try {
                 Invoke-Expression $action
             }
             catch {
                 Write-Host "❌ Fehler beim Ausführen von '$action': $($_.Exception.Message)" -ForegroundColor Red
             }
+
             Pause
         }
         else {
-            Write-Host "❌ Ungültige Eingabe. Bitte erneut versuchen."
-            Start-Sleep 1
+            Write-Host "⚠️ Ungültige Eingabe. Bitte erneut versuchen." -ForegroundColor Red
+            Start-Sleep -Seconds 1
         }
     }
 }
