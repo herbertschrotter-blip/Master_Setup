@@ -7,6 +7,9 @@
 # 🔹 JSON-Dateien ignorieren (Standard)
 *.json
 
+# 🔹 Info Dateien
+*.Md
+
 # 🔹 Logs & Backups
 04_Logs/
 05_Backup/
